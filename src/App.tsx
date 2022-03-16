@@ -1,37 +1,54 @@
-import { useState } from 'react'
-import './App.css'
-import useElementSize from './hooks/useElementSize'
+import { CSSProperties, useRef, useState } from 'react';
+import './App.css';
+import useIntersectionObserver from './hooks/useIntersectionObserver';
+import useLockedBody from './hooks/useLockedBody';
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+const fixedCenterStyle: CSSProperties = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  // transform: 'translate(-50%, -50%)',
+};
 
-function App() {
-  const [isVisible, setVisible] = useState(true)
-  const [squareRef, { width, height }] = useElementSize()
+const fakeScrollableStyle: CSSProperties = {
+  minHeight: '150vh',
+  background: 'linear-gradient(palegreen, palegoldenrod, palevioletred)',
+};
 
-  const toggleVisibility = () => setVisible(x => !x)
+// Example 1: useLockedBody as useState()
+function App1() {
+  const [locked, setLocked] = useLockedBody();
+
+  const toggleLocked = () => {
+    setLocked(!locked);
+  };
 
   return (
-    <>
-      <p>{`The square width is ${width}px and height ${height}px`}</p>
-      <p>Try, resize your window and-or click on the button.</p>
-
-      <button onClick={toggleVisibility}>
-        {isVisible ? 'Hide' : 'Show'} square
+    <div style={fakeScrollableStyle}>
+      <button style={fixedCenterStyle} onClick={toggleLocked}>
+        {locked ? 'lock scroll' : 'lock scroll'}
       </button>
-
-      {isVisible && (
-        <div
-          ref={squareRef}
-          style={{
-            width: '50%',
-            paddingTop: '50%',
-            backgroundColor: 'aquamarine',
-            margin: 'auto',
-          }}
-        />
-      )}
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+// Example 2: useLockedBody with our custom state
+function App2() {
+  const [locked, setLocked] = useState(false);
+
+  const toggleLocked = () => {
+    setLocked(!locked);
+  };
+
+  useLockedBody(locked);
+
+  return (
+    <div style={fakeScrollableStyle}>
+      <button style={fixedCenterStyle} onClick={toggleLocked}>
+        {locked ? 'unlock scroll' : 'lock scroll'}
+      </button>
+    </div>
+  );
+}
+
+export default App2;
